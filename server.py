@@ -10,18 +10,19 @@ app = Flask(__name__)
 
 @app.route("/fetch_drop", methods = ["GET"])
 def fetch_drop():
-    if "token" not in request.args:
+    """if "token" not in request.args:
         return {"status":"error", "message":"no token", "data":{}}, 401
     try:
         gt_api.user.get_user_info(request.args['token']) 
     except GeotasticAPIError as e:
-        return {"status":"error", "message":"invalid token", "data":{}}, 403
+        return {"status":"error", "message":"invalid token", "data":{}}, 403"""
     drop = database.pick_random_drop()
     if drop is None:
         return {"status":"error", "message":"no drops in database", "data":{}}, 400
 
     return {"status":"ok", "message":"", "data":drop.to_json()}
-
-
+@app.route("/get_tags", methods = ["GET"])
+def get_tags():
+    return [tag.name for tag in database.session.query(database.Tag).all()]
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
