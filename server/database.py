@@ -29,6 +29,15 @@ class Tag(Base):
     metas: Mapped[list["Meta"]] = relationship(
         secondary=meta_tag_association, back_populates="tags"
     )
+    def get_name(self):
+        names = []
+        tag = self
+        while tag:
+            names.append(tag.name)
+            tag = tag.parent
+        return  ' > '.join(reversed(names))
+    def to_json(self):
+        return {"id":self.name,"name":self.get_name(), "parent":self.parent.to_json() if self.parent else None}
 
 
 class Meta(Base):
@@ -44,7 +53,7 @@ class Meta(Base):
     drops: Mapped[list["Drop"]] = relationship(back_populates="meta")
 
     def to_json(self):
-        return {**self.meta_data, "tags": [tag.name for tag in self.tags]}
+        return {**self.meta_data, "tags": [tag.to_json() for tag in self.tags]}
 
 
 class Drop(Base):

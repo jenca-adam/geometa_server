@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>{%block title%}{%endblock%} - GeoMeta Admin</title>
+    <meta charset="utf-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    {%block head%}
+    {%endblock%}
+</head>
+
+<body>
+    <div id="app">
+        <div id="banner">
+            <div class="banner-items left">{%block bannerl%}{%endblock%}</div>
+            <div class="banner-items center"><a class="title" href="/">GeoMeta Admin</a></div>
+            <div class="banner-items right">{%block bannerr%}{%endblock%}<button id="logout" class="button">Log Out</button></div>
+        </div>
+        {%block body%}
+        {%endblock%}
+    </div>
+    <script src="/static/js/jquery.min.js"></script> 
+    <script src="//code.iconify.design/1/1.0.6/iconify.min.js"></script>
+    {%block scripts%}
+
+    {%endblock%}
+</body>
+
+</html>

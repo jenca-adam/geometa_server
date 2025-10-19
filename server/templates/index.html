@@ -1,0 +1,27 @@
+{%extends 'base.html'%}
+{%block title%}
+Home
+{%endblock%}
+{%block body%}
+<div id="site">
+    <div class="tabs">
+        <div class="tablist">
+            <button data-tab="tab-metas" class="tab-button">Metas</button>
+            <button data-tab="tab-tags" class="tab-button">Tags</button>
+        </div>
+        <div class="tab active metas" data-tab="tab-metas">
+            {%for meta in metas%}
+            <p> {{meta.meta_data["title"]}}</p>
+            {%endfor%}
+        </div>
+        <div class="tab tags" data-tab="tab-tags">
+            dovi
+        </div>
+    </div>
+</div>
+{%endblock%}
+{%block scripts%}
+<script src="/static/js/tabs.js"></script>
+<script src="/static/js/proxy.js"></script>
+<script src="/static/js/index.js"></script>
+{%endblock%}
