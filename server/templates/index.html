@@ -3,25 +3,98 @@
 Home
 {%endblock%}
 {%block body%}
+{%macro render_meta(meta) -%}
+<div class="meta" data-id="{{meta.id}}">
+    <div class="meta-overlay">
+        <div class="meta-name"> {{meta.meta_data["title"]}}</div>
+        <div class="meta-drops"> {{meta.drops|length}} drops</div>
+    </div>
+    <div class="meta-image" style="background-image:url({{meta.meta_data["image"]}})"></div>
+</div>
+{%-endmacro%}
+
 <div id="site">
     <div class="tabs">
         <div class="tablist">
-            <button data-tab="tab-metas" class="tab-button">Metas</button>
+            <button data-tab="tab-countries" class="tab-button">Countries</button>
             <button data-tab="tab-tags" class="tab-button">Tags</button>
         </div>
-        <div class="tab active metas" data-tab="tab-metas">
-            {%for meta in metas%}
-            <p> {{meta.meta_data["title"]}}</p>
-            {%endfor%}
+        <div class="tab active countries scroll" data-tab="tab-countries">
+            <div class="dropdown-list">
+                {% for country in countries%}
+                <div class="dropdown">
+                    <div class="dropdown-bar">
+                        <div class="dropdown-title">{{country.name}}</div>
+                        <span class="dropdown-button iconify" data-icon="mdi-menu-down"></span>
+                    </div>
+                    <div class="dropdown-contents">
+                        <div class="metas-grid">
+                            {%for meta in country.metas%}
+                            {{render_meta(meta)}}
+                            {%endfor%}
+                        </div>
+                    </div>
+                </div>
+                {%endfor%}
+            </div>
         </div>
-        <div class="tab tags" data-tab="tab-tags">
-            dovi
+        <div class="tab tags scroll" data-tab="tab-tags">
+            {%macro render_tag(tag) -%}
+                <div class="dropdown">
+                    <div class="dropdown-bar">
+                        <div class="dropdown-title">{{tag.name}}</div>
+                        <span class="dropdown-button iconify" data-icon="mdi-menu-down"></span>
+                    </div>
+                    <div class="dropdown-contents">
+                        {%-for child in tag.children%}
+                        {{render_tag(child)}}
+                        {%-endfor%}
+                        <div class="metas-grid">
+                            {%-for meta in tag.metas%}
+                            {{render_meta(meta)}}
+                            {%-endfor%}
+                        </div>
+                    </div>
+                </div>
+            {%-endmacro%}
+            <div class="dropdown-list">
+                {% for tag in tags%}
+                {% if not tag.parent %}
+                {{render_tag(tag)}}
+                {% endif%}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div id="meta-edit-container" class="darkbox-container db-global hidden">
+        <div class="darkbox" id="meta-edit">
+            <h1 class="darkbox-title">Edit Meta</h1>
+                <form id="edit-meta-form">
+                <p id="form-error"></p>
+                <input type="hidden" name="token" id="edit-meta-token"></input>
+                <input type="hidden" name="id" id="edit-meta-id"> </input>
+                <p class="formset"> <label class="label" for="title">Title:</label><input type="text" name="title"id="edit-meta-title"></input></p>
+                <p class="formset">  <label class="label" for="desc">Description:</label> <textarea name="desc" id="edit-meta-desc"></textarea></p>
+                <p class="formset"> <label class="label" for="link">Link:</label><input type="url" name="link" id="edit-meta-link"></input><span id="edit-meta-open-link"><span class="iconify" data-icon="mdi-open-in-new"></span></span></p>
+                <p class="formset"> <label class="label" for="image">Image:</label><input type="file" name="image" id="edit-meta-image" accept="image/*"></input></p>
+                </form>
+                <img id="edit-meta-current-image">
+                <div class="center"><button class="button" id="edit-meta-submit">Submit</button><button class="button" id="edit-meta-close">Close</button></div>
+                
         </div>
     </div>
 </div>
 {%endblock%}
 {%block scripts%}
+<script>
+META_DATA = {
+{%for meta in metas%}
+    {{meta.id}}: {{meta.meta_data|tojson}},   
+{%endfor%}
+}
+</script>
 <script src="/static/js/tabs.js"></script>
 <script src="/static/js/proxy.js"></script>
 <script src="/static/js/index.js"></script>
+<script src="/static/js/dropdown.js"></script>
 {%endblock%}

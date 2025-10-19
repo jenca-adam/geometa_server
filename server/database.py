@@ -46,14 +46,16 @@ class Meta(Base):
     meta_data: Mapped[dict] = mapped_column(
         JSON
     )  # Make the metadata format flexible, so that changing it doesn't require redoing the entire database.
-    gt_user_uid: Mapped[str] = mapped_column(String(10))
+    gt_user_uid: Mapped[str] = mapped_column(String(16))
     tags: Mapped[list["Tag"]] = relationship(
         secondary=meta_tag_association, back_populates="metas"
     )
+    country_id: Mapped[int] = mapped_column(ForeignKey("country.id"))
+    country: Mapped["Country"] = relationship(back_populates="metas")
     drops: Mapped[list["Drop"]] = relationship(back_populates="meta")
 
     def to_json(self):
-        return {**self.meta_data, "tags": [tag.to_json() for tag in self.tags]}
+        return {**self.meta_data, "tags": [tag.to_json() for tag in self.tags], "country":self.country.to_json() if self.country else None}
 
 
 class Drop(Base):
@@ -62,11 +64,18 @@ class Drop(Base):
     drop_data: Mapped[dict] = mapped_column(JSON)
     meta_id: Mapped[int] = mapped_column(ForeignKey("meta.id"))
     meta: Mapped["Meta"] = relationship(back_populates="drops")
-
+    
     def to_json(self):
         return {"drop": self.drop_data, "dropInfo": self.meta.to_json()}
 
-
+class Country(Base):
+    __tablename__ = "country"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    iso2: Mapped[str] = mapped_column(String(2))
+    name: Mapped[str] = mapped_column(String(32))
+    metas: Mapped[list["Meta"]] = relationship(back_populates="country")
+    def to_json(self):
+        return {"iso2":self.iso2, "name":self.name}
 engine = create_engine("sqlite:///db/db.sqlite")
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
@@ -84,8 +93,8 @@ def create_drop(drop_data, meta):
     return drop
 
 
-def create_meta(meta_data, gt_user_uid, tags):
-    meta = Meta(meta_data=meta_data, gt_user_uid=gt_user_uid, tags=tags)
+def create_meta(meta_data, gt_user_uid, tags, country):
+    meta = Meta(meta_data=meta_data, gt_user_uid=gt_user_uid, tags=tags, country=country)
     session.add(meta)
     session.commit()
     return meta
@@ -97,6 +106,10 @@ def create_tag(name, parent=None):
     session.commit()
     return tag
 
-
+def create_country(iso2, name):
+    country = Country(iso2=iso2, name=name)
+    session.add(country)
+    session.commit()
+    return country
 def get_tag(name):
     return session.query(Tag).filter(Tag.name == name).first()
