@@ -1,4 +1,4 @@
-from flask import Flask, request, abort, Response, render_template
+from flask import Flask, request, abort, Response, render_template, send_from_directory
 from werkzeug.utils import secure_filename
 import gt_api
 from gt_api.errors import GeotasticAPIError
@@ -100,7 +100,7 @@ def edit_meta():
             return {"status": "error", "message": "Invalid file type"}
         new_filename = os.path.join(app.config["UPLOAD_DIR"], str(uuid.uuid4())+extension)       
         image.save(new_filename)
-        new_image = f"https://geometa.gtedit.tech/uploads/{new_filename}"
+        new_image = f"https://geometa.gtedit.tech/{new_filename}"
         meta_data["image"]=new_image
     meta_data["title"]=data.get("title", meta_data["title"])
     meta_data["description"]=data.get("desc", meta_data["description"])
@@ -142,6 +142,7 @@ def index():
 @app.route("/login")
 def login():
     return render_template("login.html")
+
 def main():
     app.run(port=5000, debug=True)
 
