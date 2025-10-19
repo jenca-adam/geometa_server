@@ -58,7 +58,7 @@ class Drop(Base):
         return {"drop": self.drop_data, "dropInfo": self.meta.to_json()}
 
 
-engine = create_engine("sqlite:///db.sqlite")
+engine = create_engine("sqlite:///db/db.sqlite")
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()

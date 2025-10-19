@@ -2,10 +2,10 @@ from flask import Flask, request, abort, Response
 import gt_api
 from gt_api.errors import GeotasticAPIError
 import random
-import database
+from . import database
 from flask_cors import CORS
 
-DROP = (
+"""DROP = (
     {
         "id": 7726457,
         "owner": 1573548,
@@ -39,7 +39,7 @@ DROP_INFO = {
     "description": "if you see this, the server works",
     "link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "image": "https://http.cat/418",
-}
+}"""
 app = Flask(__name__)
 CORS(app)
 
@@ -63,6 +63,8 @@ def fetch_drop():
 def get_tags():
     return [tag.name for tag in database.session.query(database.Tag).all()]
 
-
-if __name__ == "__main__":
+def main():
     app.run(port=5000, debug=True)
+
+if __name__=="__main__":
+    main()
