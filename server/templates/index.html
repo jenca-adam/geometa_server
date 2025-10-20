@@ -69,6 +69,7 @@ Home
     <div id="meta-edit-container" class="darkbox-container db-global hidden">
         <div class="darkbox" id="meta-edit">
             <h1 class="darkbox-title">Edit Meta</h1>
+
                 <form id="edit-meta-form">
                 <p id="form-error"></p>
                 <input type="hidden" name="token" id="edit-meta-token"></input>
@@ -77,11 +78,25 @@ Home
                 <p class="formset">  <label class="label" for="desc">Description:</label> <textarea name="desc" id="edit-meta-desc"></textarea></p>
                 <p class="formset"> <label class="label" for="link">Link:</label><input type="url" name="link" id="edit-meta-link"></input><span id="edit-meta-open-link"><span class="iconify" data-icon="mdi-open-in-new"></span></span></p>
                 <p class="formset"> <label class="label" for="image">Image:</label><input type="file" name="image" id="edit-meta-image" accept="image/*"></input></p>
-                </form>
+                
                 <img id="edit-meta-current-image">
-                <div class="center"><button class="button" id="edit-meta-submit">Submit</button><button class="button" id="edit-meta-close">Close</button></div>
+                </form>
+                <div class="center"><button class="button" id="edit-meta-submit">Submit</button><button class="button" id="edit-meta-close">Close</button><a class="button export-button" id="edit-meta-export"><span class="iconify" data-icon="mdi-export"></span></a></div>
                 
         </div>
+    </div>
+    <div id="meta-show-container" class="darkbox-container db-global hidden">
+            <div class="darkbox" id="meta-show">
+                <div class="left"><h1 class="darkbox-title" id="show-meta-title">View meta</h1><a class="button export-button" id="show-meta-export"><span class="iconify" data-icon="mdi-export"></span></a></div>
+            <div id="show-meta-data">
+                <div id="show-meta-desc"></div>
+                <a id="show-meta-link">Source</a>
+                <img id="show-meta-current-image">
+                
+            </div>
+            <div class="center"><button class="button" id="show-meta-close">Close</button></div>
+        </div>
+
     </div>
 </div>
 {%endblock%}
@@ -93,6 +108,7 @@ META_DATA = {
 {%endfor%}
 }
 </script>
+<script src="/static/js/base.js"></script>
 <script src="/static/js/tabs.js"></script>
 <script src="/static/js/proxy.js"></script>
 <script src="/static/js/index.js"></script>

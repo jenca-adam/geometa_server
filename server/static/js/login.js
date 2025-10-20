@@ -55,7 +55,8 @@ $("#form-mail-password").submit((ev) => {
                 localStorage.setItem("token", tok);
                 getUserInfoViaToken(tok).then((response) => {
                     if (response.status == "ok") {
-                        localStorage.setItem("userData", JSON.stringify(response.response))
+                        localStorage.setItem("userData", JSON.stringify(response.response));
+                        localStorage.setItem("isAdmin", true);
                         location.href = '/';
                     } else {
                         console.error(response.message);
@@ -79,6 +80,7 @@ $("#form-token").submit((ev) => {
 
                 if (tok) {
                     localStorage.setItem("token", tok);
+                    localStorage.setItem("isAdmin", true);
                     location.href = '/';
                 }
             });

@@ -45,15 +45,19 @@ DROP_INFO = {
 }"""
 UPLOAD_DIR = "uploads"
 app = Flask(__name__, static_folder="static")
-app.config["UPLOAD_DIR"]=UPLOAD_DIR
+app.config["UPLOAD_DIR"] = UPLOAD_DIR
 CORS(app)
+
+
 def is_admin(token, catch=True):
     try:
-        return gt_api.user.get_user_info(token).get("communityId")==384
+        return gt_api.user.get_user_info(token).get("communityId") == 384
     except GeotasticAPIError:
         if not catch:
             raise
         return False
+
+
 @app.route("/proxy/gt/<path:url>", methods=["GET", "POST"])
 def gt_proxy(url):
     server = request.args.get("server", "api")
@@ -81,16 +85,22 @@ def gt_proxy(url):
     except requests.exceptions.ConnectionError:
         return {"status": "error", "message": "failed to connect", "response": ""}, 503
     return {"status": "ok", "message": "", "response": response}
+
+
 @app.route("/api/edit_meta", methods=["POST"])
 def edit_meta():
     data = request.form
     if "token" not in data:
-        return {"status":"error", "message":"No token"}
+        return {"status": "error", "message": "No token"}
     if not is_admin(data["token"]):
-        return {"status":"error", "message":"Invalid token"}
-    meta = database.session.query(database.Meta).filter(database.Meta.id == int(data["id"])).first()
+        return {"status": "error", "message": "Invalid token"}
+    meta = (
+        database.session.query(database.Meta)
+        .filter(database.Meta.id == int(data["id"]))
+        .first()
+    )
     if not meta:
-        return {"status":"error", "message":"Invalid meta"}
+        return {"status": "error", "message": "Invalid meta"}
     meta_data = meta.meta_data.copy()
     image = request.files.get("image")
     if image and image.filename:
@@ -98,16 +108,20 @@ def edit_meta():
         _, extension = os.path.splitext(filename)
         if extension.lower() not in [".jpg", ".jpeg", ".png", ".gif", ".webp"]:
             return {"status": "error", "message": "Invalid file type"}
-        new_filename = os.path.join(app.config["UPLOAD_DIR"], str(uuid.uuid4())+extension)       
+        new_filename = os.path.join(
+            app.config["UPLOAD_DIR"], str(uuid.uuid4()) + extension
+        )
         image.save(new_filename)
         new_image = f"https://geometa.gtedit.tech/{new_filename}"
-        meta_data["image"]=new_image
-    meta_data["title"]=data.get("title", meta_data["title"])
-    meta_data["description"]=data.get("desc", meta_data["description"])
-    meta_data["link"]=data.get("link", meta_data["link"])
+        meta_data["image"] = new_image
+    meta_data["title"] = data.get("title", meta_data["title"])
+    meta_data["description"] = data.get("desc", meta_data["description"])
+    meta_data["link"] = data.get("link", meta_data["link"])
     meta.meta_data = meta_data
     database.session.commit()
-    return {"status":"ok", "message":""}
+    return {"status": "ok", "message": ""}
+
+
 @app.route("/api/fetch_drop", methods=["GET"])
 def fetch_drop():
     """if "token" not in request.args:
@@ -122,29 +136,60 @@ def fetch_drop():
 
     return {"status": "ok", "message": "", "data": drop.to_json()}
 
+
 @app.route("/api/user_status", methods=["GET"])
 def user_status():
     token = request.args.get("token")
     if not token:
-        return {"status":"error","message":"No token", "data":{"admin":False}}
+        return {"status": "error", "message": "No token", "data": {"admin": False}}
     try:
-        admin= is_admin(token, False)
+        admin = is_admin(token, False)
     except GeotasticAPIError as e:
-        return {"status":"error", "message":"Invalid token", "data":{"admin":False}}
-    return {"status":"ok", "message":"", "data":{"admin":admin}} # restrict to mosquitoes for now
+        return {"status": "error", "message": "Invalid token", "data": {"admin": False}}
+    return {
+        "status": "ok",
+        "message": "",
+        "data": {"admin": admin},
+    }  # restrict to mosquitoes for now
+
 
 @app.route("/api/get_tags", methods=["GET"])
 def get_tags():
     return [tag.name for tag in database.session.query(database.Tag).all()]
+
+@app.route("/export_meta", methods=["GET"])
+def export_meta():
+    meta_id_s = request.args.get("id")
+    fmt = request.args.get("fmt","mma")
+    try:
+        meta_id = int(meta_id_s)
+    except:
+        return []
+
+    meta = database.session.query(database.Meta).filter(database.Meta.id==meta_id).first()
+    if not meta:
+        return []
+    if fmt == "mma":
+        return [drop.to_mma() for drop in meta.drops]
+
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("index.html", countries = database.session.query(database.Country).all(), tags = database.session.query(database.Tag).all(), metas = database.session.query(database.Meta).all())
+    return render_template(
+        "index.html",
+        countries=database.session.query(database.Country).all(),
+        tags=database.session.query(database.Tag).all(),
+        metas=database.session.query(database.Meta).all(),
+    )
+
+
 @app.route("/login")
 def login():
     return render_template("login.html")
 
+
 def main():
     app.run(port=5000, debug=True)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()

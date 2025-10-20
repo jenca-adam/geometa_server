@@ -29,15 +29,21 @@ class Tag(Base):
     metas: Mapped[list["Meta"]] = relationship(
         secondary=meta_tag_association, back_populates="tags"
     )
+
     def get_name(self):
         names = []
         tag = self
         while tag:
             names.append(tag.name)
             tag = tag.parent
-        return  ' > '.join(reversed(names))
+        return " > ".join(reversed(names))
+
     def to_json(self):
-        return {"id":self.name,"name":self.get_name(), "parent":self.parent.to_json() if self.parent else None}
+        return {
+            "id": self.name,
+            "name": self.get_name(),
+            "parent": self.parent.to_json() if self.parent else None,
+        }
 
 
 class Meta(Base):
@@ -54,8 +60,15 @@ class Meta(Base):
     country: Mapped["Country"] = relationship(back_populates="metas")
     drops: Mapped[list["Drop"]] = relationship(back_populates="meta")
 
+    def to_mma(self):
+        return f"{self.id} {self.meta_data.get('title', '?')}"
+
     def to_json(self):
-        return {**self.meta_data, "tags": [tag.to_json() for tag in self.tags], "country":self.country.to_json() if self.country else None}
+        return {
+            **self.meta_data,
+            "tags": [tag.to_json() for tag in self.tags],
+            "country": self.country.to_json() if self.country else None,
+        }
 
 
 class Drop(Base):
@@ -64,9 +77,26 @@ class Drop(Base):
     drop_data: Mapped[dict] = mapped_column(JSON)
     meta_id: Mapped[int] = mapped_column(ForeignKey("meta.id"))
     meta: Mapped["Meta"] = relationship(back_populates="drops")
-    
+
     def to_json(self):
         return {"drop": self.drop_data, "dropInfo": self.meta.to_json()}
+
+    def to_mma(self):
+        return {
+            "lat": self.drop_data.get("lat", 0),
+            "lng": self.drop_data.get("lng", 0),
+            "heading": self.drop_data.get("heading", 0),
+            "pitch": self.drop_data.get("pitch", 0),
+            "zoom": self.drop_data.get("zoom", 0),
+            "panoId": self.drop_data.get("panoId"),
+            "countryCode": self.drop_data.get("code", self.meta.country.iso2),
+            "stateCode": self.drop_data.get("subCode"),
+            "extra": {
+                "panoId": self.drop_data.get("panoId"),
+                "tags": [self.meta.to_mma()],
+            },
+        }
+
 
 class Country(Base):
     __tablename__ = "country"
@@ -74,8 +104,11 @@ class Country(Base):
     iso2: Mapped[str] = mapped_column(String(2))
     name: Mapped[str] = mapped_column(String(32))
     metas: Mapped[list["Meta"]] = relationship(back_populates="country")
+
     def to_json(self):
-        return {"iso2":self.iso2, "name":self.name}
+        return {"iso2": self.iso2, "name": self.name}
+
+
 engine = create_engine("sqlite:///db/db.sqlite")
 Base.metadata.create_all(engine)
 Session = scoped_session(sessionmaker(bind=engine))
@@ -94,7 +127,9 @@ def create_drop(drop_data, meta):
 
 
 def create_meta(meta_data, gt_user_uid, tags, country):
-    meta = Meta(meta_data=meta_data, gt_user_uid=gt_user_uid, tags=tags, country=country)
+    meta = Meta(
+        meta_data=meta_data, gt_user_uid=gt_user_uid, tags=tags, country=country
+    )
     session.add(meta)
     session.commit()
     return meta
@@ -106,10 +141,13 @@ def create_tag(name, parent=None):
     session.commit()
     return tag
 
+
 def create_country(iso2, name):
     country = Country(iso2=iso2, name=name)
     session.add(country)
     session.commit()
     return country
+
+
 def get_tag(name):
     return session.query(Tag).filter(Tag.name == name).first()
