@@ -3,7 +3,7 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.sql import func
 
 
@@ -78,7 +78,7 @@ class Country(Base):
         return {"iso2":self.iso2, "name":self.name}
 engine = create_engine("sqlite:///db/db.sqlite")
 Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
+Session = scoped_session(sessionmaker(bind=engine))
 session = Session()
 
 
