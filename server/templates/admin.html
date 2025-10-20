@@ -1,0 +1,75 @@
+{%extends 'base.html'%}
+{%block title%}
+Admin
+{%endblock%}
+{%block bannerr%}
+<a class="button" href="/">Home</a>
+{%endblock%}
+{%block body%}
+<template id="tag-select-template">
+    <select name="tag" class="new-meta-tag">
+        {%for tag in tags%}
+        <option name="{{tag.id}}" value="{{tag.id}}">{{tag.get_name()}}</option>
+        {%endfor%}
+    </select>
+</template>
+<div id="site">
+    <div class="tabs">
+        <div class="tablist">
+            <button data-tab="new-meta" class="tab-button">New Meta</button>
+            <button data-tab="new-tag" class="tab-button">New Tag</button>
+            <button data-tab="global-import" class="tab-button">Global import</button>
+            <button data-tab="global-export" class="tab-button">Global export</button>
+        </div>
+        <div class="tab active scroll" data-tab="new-meta">
+            <form id="new-meta-form">
+                <p id="form-error"></p>
+                <input type="hidden" name="token" id="new-meta-token"></input>
+                <p class="formset"> <label class="label" for="country">Country</label> 
+                <select name="country" id="new-meta-country">
+                    {%for country in countries%}
+                    <option name="{{country.id}}" value="{{country.id}}">{{country.name}}</option>
+                    {%endfor%}
+                </select>
+                </p>
+                <div class="taglist-container">
+                    Tags:
+                    <div class="left">
+                    <ul id="new-meta-taglist" class="taglist">
+                    </ul>
+                    <button type="button" id="new-meta-add-tag" class="button add-tag"><span class="iconify" data-icon="mdi-plus"></span></button>
+                    <select class="tag-select hidden" id="new-meta-tag-select">
+                        {%for tag in tags%}
+                        <option name="{{tag.id}}" value="{{tag.id}}">{{tag.get_name()}}</option>
+                        {%endfor%}
+                    </select>
+                    </div>
+                </div>
+                <p class="formset"> <label class="label" for="title">Title:</label><input type="text" name="title"id="new-meta-title"></input></p>
+                <p class="formset">  <label class="label" for="desc">Description:</label> <textarea name="desc" id="new-meta-desc"></textarea></p>
+                <p class="formset"> <label class="label" for="link">Link:</label><input type="url" name="link" id="new-meta-link"></input><span id="new-meta-open-link"><span class="iconify" data-icon="mdi-open-in-new"></span></span></p>
+                <p class="formset"> <label class="label" for="image">Image:</label><input type="file" name="image" id="new-meta-image" accept="image/*"></input></p>
+                
+                <img id="new-meta-current-image">
+            </form>
+        </div>
+        <div class="tab scroll" data-tab="global-import">
+        </div>
+        <div class="tab scroll" data-tab="global-export">
+            <p>Select export format</p>
+            <form id="global-export-form">
+                <p id="form-error"></p>
+                <p><input type="radio" selected name="format" value="mma" id="fmt-mma"></input><label for="fmt-mma">map-making.app (meta name in tag)</label></p>
+                <p><input type="radio" disabled name="format" value="gt"></input><label for="fmt-gt">Geotastic (meta name in drop title)</label></p>
+            </form>
+            <button id="global-export-submit"class="button">Submit</button>
+        </div>
+    </div>
+</div>
+{%endblock%}
+{%block scripts%}
+<script src="/static/js/tabs.js"></script>
+<script src="/static/js/base.js"></script>
+<script src="/static/js/admin.js"></script>
+
+{%endblock%}

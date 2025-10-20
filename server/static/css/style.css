@@ -258,12 +258,12 @@ html, body{
 #edit-meta-open-link{
     cursor:pointer;
 }
-#edit-meta-current-image, #show-meta-current-image{
+#edit-meta-current-image, #show-meta-current-image, #new-meta-current-image{
     height:150px;
     margin:1em;
     align-self:flex-start;
 }
-.db-global .button{
+.db-global .button, #banner .button{
     margin: 0 0.2em;
 }
 .db-global {
@@ -282,7 +282,7 @@ html, body{
 #show-meta-export{
   margin-left:1em!important;
 }
-#show-meta-data, #edit-meta-form{
+#show-meta-data, #edit-meta-form, #new-meta-form{
   display: flex;
   flex-direction: column;
   margin: 1em 0;
@@ -296,4 +296,36 @@ html, body{
 }
 .dropdown-list:has(> .dropdown.open:last-child){
     border-color:#777;
+}
+.add-tag {
+  padding: 0.5em;
+  clip-path: circle();
+}
+.taglist-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 1em;
+}
+.taglist {
+  margin-left: 2em;
+padding-inline-start: 0;
+display: flex;
+flex-wrap: wrap;
+}
+.tag {
+    display: inline;
+    appearance: none;
+    background: #ccc;
+    padding: 0.2em;
+    border-radius: 5px;
+    font-size: 10pt;
+    margin: 0.2em;
+}
+.taglist.readonly .tag-remove{
+    display:none;
+}
+.tag-remove {
+    margin-left: 0.3em;
+    cursor: pointer;
 }

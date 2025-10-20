@@ -1,5 +1,6 @@
 if (localStorage.isAdmin=="true"){
     $("#logout").removeClass("hidden");
+    $("#admin").removeClass("hidden");
 }
 else{
     $("#login").removeClass("hidden");
@@ -7,7 +8,7 @@ else{
 $("#logout").click(function(){
     localStorage.isAdmin = "false";
     localStorage.removeItem("token");
-    location.reload();
+    location.replace("/");
 })
 $("#login").click(function(){
     location.replace("/login");

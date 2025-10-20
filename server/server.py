@@ -8,46 +8,24 @@ from flask_cors import CORS
 import uuid
 import os
 
-"""DROP = (
-    {
-        "id": 7726457,
-        "owner": 1573548,
-        "style": "streetview",
-        "lat": 48.4403605385592,
-        "lng": 19.796818194444,
-        "mapId": 14155,
-        "challengeId": 0,
-        "groupId": 0,
-        "code": "sk",
-        "subCode": "sk-bc",
-        "wikiId": 0,
-        "panoId": "QsvGtGRPk1h_xzMrW1kJIw",
-        "heading": 0,
-        "pitch": 0,
-        "zoom": 0,
-        "disallowTrekker": -1,
-        "imageUrl": None,
-        "copyright": None,
-        "hint": None,
-        "photosphereData": None,
-        "hideCompass": False,
-        "isLandmarkTip": False,
-        "sorting": 28,
-        "radius": 0,
-        "type": "single",
-    },
-)  # for now
-DROP_INFO = {
-    "title": "Hello, world!",
-    "description": "if you see this, the server works",
-    "link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    "image": "https://http.cat/418",
-}"""
+
 UPLOAD_DIR = "uploads"
 app = Flask(__name__, static_folder="static")
 app.config["UPLOAD_DIR"] = UPLOAD_DIR
 CORS(app)
 
+
+def build_tag_list():
+    def build_from_root(root):
+        out = [root]
+        for tag in root.children:
+            out.extend(build_from_root(tag))
+        return out
+    out = []
+    roots = database.session.query(database.Tag).filter(database.Tag.parent==None)
+    for root in roots:
+        out.extend(build_from_root(root))
+    return out
 
 def is_admin(token, catch=True):
     try:
@@ -93,7 +71,7 @@ def edit_meta():
     if "token" not in data:
         return {"status": "error", "message": "No token"}
     if not is_admin(data["token"]):
-        return {"status": "error", "message": "Invalid token"}
+        return {"status": "error", "message": "No access"}
     meta = (
         database.session.query(database.Meta)
         .filter(database.Meta.id == int(data["id"]))
@@ -114,10 +92,16 @@ def edit_meta():
         image.save(new_filename)
         new_image = f"https://geometa.gtedit.tech/{new_filename}"
         meta_data["image"] = new_image
+    country = data.get("country")
+    if not country or not country.isdigit():
+        country =meta.country_id
+    else:
+        country = int(country)
     meta_data["title"] = data.get("title", meta_data["title"])
     meta_data["description"] = data.get("desc", meta_data["description"])
     meta_data["link"] = data.get("link", meta_data["link"])
     meta.meta_data = meta_data
+    meta.country_id = country
     database.session.commit()
     return {"status": "ok", "message": ""}
 
@@ -155,7 +139,17 @@ def user_status():
 
 @app.route("/api/get_tags", methods=["GET"])
 def get_tags():
-    return [tag.name for tag in database.session.query(database.Tag).all()]
+    return [tag.to_json() for tag in database.session.query(database.Tag).all()]
+@app.route("/api/export_all", methods=["GET"])
+def export_all():
+    token = request.args.get("token")
+    if not is_admin(token):
+        return {"status":"error", "message":"No access", "data":None}
+    fmt = request.args.get("fmt","mma")
+    drops = database.session.query(database.Drop).all()
+    if fmt=="mma":
+        return {"status":"ok", "message":"", "data":[drop.to_mma() for drop in drops]}
+    return {"status":"error","message":"Invalid fmt","data":None}
 
 @app.route("/export_meta", methods=["GET"])
 def export_meta():
@@ -171,7 +165,7 @@ def export_meta():
         return []
     if fmt == "mma":
         return [drop.to_mma() for drop in meta.drops]
-
+    return  []
 @app.route("/", methods=["GET"])
 def index():
     return render_template(
@@ -185,7 +179,13 @@ def index():
 @app.route("/login")
 def login():
     return render_template("login.html")
-
+@app.route("/admin")
+def admin():
+    return render_template("admin.html", countries=database.session.query(database.Country).all(),  tags=build_tag_list()
+)
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    database.session.remove()
 
 def main():
     app.run(port=5000, debug=True)

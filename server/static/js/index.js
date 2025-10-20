@@ -1,6 +1,7 @@
 function prepareEditMetaForm(id){
     const data = META_DATA[id];
     if(!data) return;
+    $("#edit-meta-country").val(data.country.id);
     $("#edit-meta-token").val(localStorage.token);
     $("#edit-meta-id").val(id);
     $("#edit-meta-title").val(data.title);
@@ -8,6 +9,10 @@ function prepareEditMetaForm(id){
     $("#edit-meta-link").val(data.link);
     $("#edit-meta-current-image").attr("src", data.image);
     $("#edit-meta-export").attr("href", `/export_meta?id=${id}&format=mma`).attr("download",`geometa-export-${id}.json`);
+    const tagList = $("#edit-meta-taglist")
+    for(const tag of data.tags){
+        addTag(tagList, tag.name, tag.id);
+    }
 }
 function prepareViewMeta(id){
     const data = META_DATA[id];
@@ -17,6 +22,10 @@ function prepareViewMeta(id){
     $("#show-meta-link").attr("href", data.link);
     $("#show-meta-current-image").attr("src", data.image);
     $("#show-meta-export").attr("href", `/export_meta?id=${id}&format=mma`).attr("download",`geometa-export-${id}.json`);
+    const tagList = $("#show-meta-taglist")
+    for(const tag of data.tags){
+        addTag(tagList, tag.name, tag.id);
+    }
 }
 $(".export-button").click(function(){
     

@@ -2,6 +2,9 @@
 {%block title%}
 Home
 {%endblock%}
+{%block bannerr%}
+<a class="button hidden" href="/admin" id="admin">Admin</a>
+{%endblock%}
 {%block body%}
 {%macro render_meta(meta) -%}
 <div class="meta" data-id="{{meta.id}}">
@@ -21,7 +24,7 @@ Home
         </div>
         <div class="tab active countries scroll" data-tab="tab-countries">
             <div class="dropdown-list">
-                {% for country in countries%}
+                {% for country in countries%}{% if country.metas%}
                 <div class="dropdown">
                     <div class="dropdown-bar">
                         <div class="dropdown-title">{{country.name}}</div>
@@ -35,7 +38,7 @@ Home
                         </div>
                     </div>
                 </div>
-                {%endfor%}
+                {%endif%}{%endfor%}
             </div>
         </div>
         <div class="tab tags scroll" data-tab="tab-tags">
@@ -74,8 +77,29 @@ Home
                 <p id="form-error"></p>
                 <input type="hidden" name="token" id="edit-meta-token"></input>
                 <input type="hidden" name="id" id="edit-meta-id"> </input>
+                <select name="country" id="edit-meta-country">
+                    {%for country in countries%}
+                    <option name="{{country.id}}" value="{{country.id}}">{{country.name}}</option>
+                    {%endfor%}
+                </select>
                 <p class="formset"> <label class="label" for="title">Title:</label><input type="text" name="title"id="edit-meta-title"></input></p>
                 <p class="formset">  <label class="label" for="desc">Description:</label> <textarea name="desc" id="edit-meta-desc"></textarea></p>
+
+                 <div class="taglist-container">
+                    Tags:
+                    <div class="left">
+                    <ul class="taglist readonly" id="edit-meta-taglist">
+                    </ul>
+
+                 <button type="button" id="edit-meta-add-tag" class="button add-tag"><span class="iconify" data-icon="mdi-plus"></span></button>
+                    </div>
+                    <select class="tag-select hidden" id="edit-meta-tag-select">
+                        {%for tag in tags%}
+                        <option name="{{tag.id}}" value="{{tag.id}}">{{tag.get_name()}}</option>
+                        {%endfor%}
+                    </select>
+                
+                </div>
                 <p class="formset"> <label class="label" for="link">Link:</label><input type="url" name="link" id="edit-meta-link"></input><span id="edit-meta-open-link"><span class="iconify" data-icon="mdi-open-in-new"></span></span></p>
                 <p class="formset"> <label class="label" for="image">Image:</label><input type="file" name="image" id="edit-meta-image" accept="image/*"></input></p>
                 
@@ -90,6 +114,12 @@ Home
                 <div class="left"><h1 class="darkbox-title" id="show-meta-title">View meta</h1><a class="button export-button" id="show-meta-export"><span class="iconify" data-icon="mdi-export"></span></a></div>
             <div id="show-meta-data">
                 <div id="show-meta-desc"></div>
+
+                <div class="taglist-container">
+                    Tags:
+                    <ul class="taglist readonly" id="show-meta-taglist">
+                    </ul>
+                </div>
                 <a id="show-meta-link">Source</a>
                 <img id="show-meta-current-image">
                 
@@ -104,11 +134,12 @@ Home
 <script>
 META_DATA = {
 {%for meta in metas%}
-    {{meta.id}}: {{meta.meta_data|tojson}},   
+    {{meta.id}}: {{meta.to_json()|tojson}},   
 {%endfor%}
 }
 </script>
 <script src="/static/js/base.js"></script>
+<script src="/static/js/taglist.js"></script>
 <script src="/static/js/tabs.js"></script>
 <script src="/static/js/proxy.js"></script>
 <script src="/static/js/index.js"></script>

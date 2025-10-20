@@ -5,7 +5,7 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.sql import func
-
+from sqlalchemy.ext.mutable import MutableDict
 
 class Base(DeclarativeBase):
     pass
@@ -40,7 +40,8 @@ class Tag(Base):
 
     def to_json(self):
         return {
-            "id": self.name,
+            "id":self.id,
+            "rawName": self.name,
             "name": self.get_name(),
             "parent": self.parent.to_json() if self.parent else None,
         }
@@ -50,7 +51,7 @@ class Meta(Base):
     __tablename__ = "meta"
     id: Mapped[int] = mapped_column(primary_key=True)
     meta_data: Mapped[dict] = mapped_column(
-        JSON
+        MutableDict.as_mutable(JSON)
     )  # Make the metadata format flexible, so that changing it doesn't require redoing the entire database.
     gt_user_uid: Mapped[str] = mapped_column(String(16))
     tags: Mapped[list["Tag"]] = relationship(
@@ -68,18 +69,19 @@ class Meta(Base):
             **self.meta_data,
             "tags": [tag.to_json() for tag in self.tags],
             "country": self.country.to_json() if self.country else None,
+            "id":self.id,
         }
 
 
 class Drop(Base):
     __tablename__ = "drop"
     id: Mapped[int] = mapped_column(primary_key=True)
-    drop_data: Mapped[dict] = mapped_column(JSON)
+    drop_data: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON))
     meta_id: Mapped[int] = mapped_column(ForeignKey("meta.id"))
     meta: Mapped["Meta"] = relationship(back_populates="drops")
 
     def to_json(self):
-        return {"drop": self.drop_data, "dropInfo": self.meta.to_json()}
+        return {"drop": self.drop_data, "dropInfo": self.meta.to_json(), "id":self.id}
 
     def to_mma(self):
         return {
@@ -106,13 +108,12 @@ class Country(Base):
     metas: Mapped[list["Meta"]] = relationship(back_populates="country")
 
     def to_json(self):
-        return {"iso2": self.iso2, "name": self.name}
+        return {"iso2": self.iso2, "name": self.name, "id":self.id}
 
 
 engine = create_engine("sqlite:///db/db.sqlite")
 Base.metadata.create_all(engine)
-Session = scoped_session(sessionmaker(bind=engine))
-session = Session()
+session = scoped_session(sessionmaker(bind=engine))
 
 
 def pick_random_drop():
