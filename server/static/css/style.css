@@ -299,13 +299,17 @@ html, body{
 }
 .add-tag {
   padding: 0.5em;
-  clip-path: circle();
+  margin: 0 0.2em 0 0 !important;
+    border-radius:100%;
+    clip-path:circle();
 }
+
 .taglist-container {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
   margin-left: 1em;
+  justify-content: flex-start;
 }
 .taglist {
   margin-left: 2em;
@@ -328,4 +332,19 @@ flex-wrap: wrap;
 .tag-remove {
     margin-left: 0.3em;
     cursor: pointer;
+}
+.add-tag-container {
+  display: flex;
+  white-space: nowrap;
+  background: #fff;
+  border-radius: 2em;
+  padding: 0.1em;
+}
+.tag-select {
+  border: none;
+  background: transparent;
+}
+
+.formset input,.formset textarea {
+  flex: 1;
 }

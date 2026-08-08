@@ -31,7 +31,7 @@ Home
                         <span class="dropdown-button iconify" data-icon="mdi-menu-down"></span>
                     </div>
                     <div class="dropdown-contents">
-                        <div class="metas-grid">
+                        <div class="metas-grid hidden">
                             {%for meta in country.metas%}
                             {{render_meta(meta)}}
                             {%endfor%}
@@ -88,18 +88,19 @@ Home
                  <div class="taglist-container">
                     Tags:
                     <div class="left">
-                    <ul class="taglist readonly" id="edit-meta-taglist">
+                    <ul class="taglist" id="edit-meta-taglist">
                     </ul>
 
-                 <button type="button" id="edit-meta-add-tag" class="button add-tag"><span class="iconify" data-icon="mdi-plus"></span></button>
+                    <div class="add-tag-container"><button type="button" id="edit-meta-add-tag" class="button add-tag"><span class="iconify" data-icon="mdi-plus"></span></button><select class="tag-select" id="edit-meta-tag-select"></div>
                     </div>
-                    <select class="tag-select hidden" id="edit-meta-tag-select">
                         {%for tag in tags%}
                         <option name="{{tag.id}}" value="{{tag.id}}">{{tag.get_name()}}</option>
                         {%endfor%}
                     </select>
                 
+                    </div>
                 </div>
+    </div>
                 <p class="formset"> <label class="label" for="link">Link:</label><input type="url" name="link" id="edit-meta-link"></input><span id="edit-meta-open-link"><span class="iconify" data-icon="mdi-open-in-new"></span></span></p>
                 <p class="formset"> <label class="label" for="image">Image:</label><input type="file" name="image" id="edit-meta-image" accept="image/*"></input></p>
                 

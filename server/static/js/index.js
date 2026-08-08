@@ -9,7 +9,8 @@ function prepareEditMetaForm(id){
     $("#edit-meta-link").val(data.link);
     $("#edit-meta-current-image").attr("src", data.image);
     $("#edit-meta-export").attr("href", `/export_meta?id=${id}&format=mma`).attr("download",`geometa-export-${id}.json`);
-    const tagList = $("#edit-meta-taglist")
+    const tagList = $("#edit-meta-taglist");
+    tagList.find(".tag").remove();
     for(const tag of data.tags){
         addTag(tagList, tag.name, tag.id);
     }
@@ -64,6 +65,8 @@ $("#edit-meta-close").click(function(){$("#meta-edit-container").addClass("hidde
 $("#show-meta-close").click(function(){$("#meta-show-container").addClass("hidden")});
 $("#edit-meta-submit").click(function(){
     const formData = new FormData($("#edit-meta-form")[0]);
+    const tagList = $("#edit-meta-form .taglist");
+    formData.set("tags",JSON.stringify(getTagIdArray(tagList)));
     fetch("/api/edit_meta", {method:"POST", body:formData}).then((result)=>{
         result.json().then((json)=>{
             if (json.status!="ok"){
